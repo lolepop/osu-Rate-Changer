@@ -4,6 +4,8 @@
 
 A song rate changer for osu! that doesn't rely on direct edits to the audio file.
 
+[See the program in action](https://www.youtube.com/watch?v=8LZtB8Q1bYE)
+
 ## Features
   - External client to adjust in-game speed
   - Custom rates
@@ -11,6 +13,9 @@ A song rate changer for osu! that doesn't rely on direct edits to the audio file
   - Atrocious UI design
 
 ## How to use
+
+[As close to a tutorial as it gets](https://www.youtube.com/watch?v=Sj9vK9yt1s4)
+
 1. Make sure the game is started and **make sure you are signed out**
 2. Click *inject*
 3. Start any song (you can just start and immediately exit)
@@ -35,9 +40,6 @@ Setting the speed to 0 will likely crash the game.
   - Removes the need to modify the map (first point. As well as not having to mess with OD settings to prevent excessive notelocking)
   - No gigantic song files from all the different rates
 
-## Disclaimer
-This program is not designed as a cheat should not be used as such. If you use it and get banned, that's your fault.
-
 ## Additional details
 This program was written in a day and the preset editing feature was added the next day. It uses C# for the UI and C++ for whatever low level stuff goes on.
 
@@ -55,3 +57,6 @@ Now jumps to this:
 
 
 The internal function gets detoured by the injected DLL and the speed value (same as the one read externally) replaces the original in ```[esi + 34]```. This value changes when a different song is selected on the song selection screen so detouring the function would be more effective than modifying the value in this address every time you change songs.
+
+## Disclaimer
+This program is not designed as a cheat should not be used as such. If you use it and get banned, that's your fault.
