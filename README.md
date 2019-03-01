@@ -26,11 +26,11 @@ Setting the speed to 0 will likely crash the game.
   - You must play with the speed mods on
     - This is a problem for other game modes like mania (I can't play the other game modes well enough to tell) where speed is scaled up and back down. (eg. Selecting DT and playing at with lower speed multiplier than 1.5 will be as if you are playing with DT but physically slowed time down. The notes move slower and you have to increase your scroll speed)
     - Half time does the same thing but makes everything scroll faster
-    - Can be counteracted by simply chaning your scroll speed
+    - Can be counteracted by simply changing your scroll speed
   - The method used by the program uses DLL injection so your antivirus may flag it as a result.
   - You probably need to go offline since people can still spectate you but see the game as if it were at the regular mod speed. (You cannot submit scores online anyway since the audio desync will cause the game to nullify your score)
 
-## Main advantages (over editing audio files and map)
+## Main advantages (Over editing audio files and maps)
   - AR scales properly (manually editing the map will limit you to a maximum of AR 10)
   - Removes the need to modify the map (first point. As well as not having to mess with OD settings to prevent excessive notelocking)
   - No gigantic song files from all the different rates
