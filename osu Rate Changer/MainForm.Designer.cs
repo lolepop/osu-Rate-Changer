@@ -39,6 +39,7 @@
 			this.EditGroup = new System.Windows.Forms.GroupBox();
 			this.AddBtn = new System.Windows.Forms.Button();
 			this.BtnGroup = new System.Windows.Forms.GroupBox();
+			this.forceNormalBox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.RateTrackBar)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.RateUpDown)).BeginInit();
 			this.EditGroup.SuspendLayout();
@@ -181,11 +182,24 @@
 			this.BtnGroup.TabStop = false;
 			this.BtnGroup.Paint += new System.Windows.Forms.PaintEventHandler(this.GroupBoxPaint);
 			// 
+			// forceNormalBox
+			// 
+			this.forceNormalBox.AutoSize = true;
+			this.forceNormalBox.Enabled = false;
+			this.forceNormalBox.Location = new System.Drawing.Point(121, 256);
+			this.forceNormalBox.Name = "forceNormalBox";
+			this.forceNormalBox.Size = new System.Drawing.Size(111, 17);
+			this.forceNormalBox.TabIndex = 9;
+			this.forceNormalBox.Text = "Use normal speed";
+			this.forceNormalBox.UseVisualStyleBackColor = true;
+			this.forceNormalBox.CheckedChanged += new System.EventHandler(this.forceNormalBox_CheckedChanged);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 369);
+			this.Controls.Add(this.forceNormalBox);
 			this.Controls.Add(this.EditBtn);
 			this.Controls.Add(this.RangeLockCheckbox);
 			this.Controls.Add(this.UpdateSpeedBtn);
@@ -223,6 +237,7 @@
 		private System.Windows.Forms.GroupBox EditGroup;
 		private System.Windows.Forms.Button AddBtn;
 		private System.Windows.Forms.GroupBox BtnGroup;
+		private System.Windows.Forms.CheckBox forceNormalBox;
 	}
 }
 

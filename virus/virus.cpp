@@ -53,7 +53,11 @@ void checkMultiplier()
 		if (speed != before)
 		{
 			before = speed;
-			printf("Speed multiplier: %.2fx\n", speed / 1147.0f);
+
+			if (speed > 0.f)
+				printf("Speed multiplier: %.2fx\n", speed / 1147.0f);
+			else
+				printf("Speed multiplier: Default\n");
 		}
 		Sleep(1000);
 	}
@@ -63,11 +67,24 @@ void _declspec(naked) setSpeed() // function that replaces original
 {
 	__asm
 	{
-		push ebx
-		mov ebx, [speed]
-		mov [esi + 0x34], ebx
-		pop ebx
+		fst dword ptr [esi + 0x34]
+	}
 
+	if (speed > 0.f)
+	{
+		__asm
+		{
+			fst st(0)
+			push ebx
+			mov ebx, [speed]
+			mov [esi + 0x34], ebx
+			pop ebx
+		}
+	}
+
+	
+	__asm
+	{
 		fadd dword ptr [orig]
 
 		jmp [back]

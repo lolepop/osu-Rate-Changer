@@ -88,6 +88,7 @@ namespace osu_Rate_Changer
 
 				Enabled = true;
 				InjectBtn.Enabled = false;
+				forceNormalBox.Enabled = true;
 				UpdateSpeedBtn.Enabled = true;
 
 				Util.GetHandle();
@@ -114,7 +115,8 @@ namespace osu_Rate_Changer
 
 		private void UpdateSpeedBtn_Click(object sender, EventArgs e)
 		{
-			Util.SetSpeed((float)RateUpDown.Value);
+			if (!forceNormalBox.Checked)
+				Util.SetSpeed((float)RateUpDown.Value);
 		}
 
 		private void RangeLockCheckbox_CheckedChanged(object sender, EventArgs e)
@@ -268,6 +270,11 @@ namespace osu_Rate_Changer
 		private void UpdateSpeedEnabled(object sender, EventArgs e)
 		{
 			BtnGroup.Enabled = UpdateSpeedBtn.Enabled;
+		}
+
+		private void forceNormalBox_CheckedChanged(object sender, EventArgs e)
+		{
+			Util.SetSpeed(forceNormalBox.Checked ? 0 : (float)RateUpDown.Value);
 		}
 
 		[DllImport("injector.dll", CallingConvention = CallingConvention.Cdecl)]

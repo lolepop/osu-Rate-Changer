@@ -25,15 +25,16 @@ A song rate changer for osu! that doesn't rely on direct edits to the audio file
 
 This also works in the edit menu if you want to change the speed there for some reason.
 
-Setting the speed to 0 will likely crash the game.
+~~Setting the speed to 0 will likely crash the game.~~
+Any speed multiplier 0 and below will now have the same effect as letting the game set the speed for you normally. (Changed when the *force normal speed* checkbox was added)
 
 ## Limitations
   - You must play with the speed mods on
-    - This is a problem for other game modes like mania (I can't play the other game modes well enough to tell) where speed is scaled up and back down. (eg. Selecting DT and playing at with lower speed multiplier than 1.5 will be as if you are playing with DT but physically slowed time down. The notes move slower and you have to increase your scroll speed)
+    - This is a problem for other game modes like mania (I can't play the other game modes well enough to tell) where speed is scaled up and back down. (eg. Selecting DT and playing at with lower speed multiplier than 1.5x will be as if you are playing with DT but physically slowed time down. The notes move slower, so you have to increase your scroll speed to compensate)
     - Half time does the same thing but makes everything scroll faster
     - Can be counteracted by simply changing your scroll speed
-  - The method used by the program uses DLL injection so your antivirus may flag it as a result.
-  - You probably need to go offline since people can still spectate you but see the game as if it were at the regular mod speed. (You cannot submit scores online anyway since the audio desync will cause the game to nullify your score)
+  - The program uses DLL injection to internally change the game's memory and your antivirus may flag it as a result.
+  - You probably need to go offline since people can still spectate you but see the game as if it were at the nomod speed. (You cannot submit scores online anyway since the audio desync will cause the game to nullify your score)
 
 ## Main advantages (Over editing audio files and maps)
   - AR scales properly (manually editing the map will limit you to a maximum of AR 10)
