@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.421
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29519.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "virus", "virus\virus.vcxproj", "{62B67AE3-F337-4FFF-AB36-78E0682D765F}"
 EndProject
@@ -20,21 +20,25 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{62B67AE3-F337-4FFF-AB36-78E0682D765F}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{62B67AE3-F337-4FFF-AB36-78E0682D765F}.Debug|Any CPU.Build.0 = Debug|Win32
 		{62B67AE3-F337-4FFF-AB36-78E0682D765F}.Debug|x64.ActiveCfg = Debug|x64
 		{62B67AE3-F337-4FFF-AB36-78E0682D765F}.Debug|x64.Build.0 = Debug|x64
 		{62B67AE3-F337-4FFF-AB36-78E0682D765F}.Debug|x86.ActiveCfg = Debug|Win32
 		{62B67AE3-F337-4FFF-AB36-78E0682D765F}.Debug|x86.Build.0 = Debug|Win32
 		{62B67AE3-F337-4FFF-AB36-78E0682D765F}.Release|Any CPU.ActiveCfg = Release|Win32
+		{62B67AE3-F337-4FFF-AB36-78E0682D765F}.Release|Any CPU.Build.0 = Release|Win32
 		{62B67AE3-F337-4FFF-AB36-78E0682D765F}.Release|x64.ActiveCfg = Release|x64
 		{62B67AE3-F337-4FFF-AB36-78E0682D765F}.Release|x64.Build.0 = Release|x64
 		{62B67AE3-F337-4FFF-AB36-78E0682D765F}.Release|x86.ActiveCfg = Release|Win32
 		{62B67AE3-F337-4FFF-AB36-78E0682D765F}.Release|x86.Build.0 = Release|Win32
 		{A5EAA150-02AA-403F-9FC5-E76B182EE39D}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{A5EAA150-02AA-403F-9FC5-E76B182EE39D}.Debug|Any CPU.Build.0 = Debug|Win32
 		{A5EAA150-02AA-403F-9FC5-E76B182EE39D}.Debug|x64.ActiveCfg = Debug|x64
 		{A5EAA150-02AA-403F-9FC5-E76B182EE39D}.Debug|x64.Build.0 = Debug|x64
 		{A5EAA150-02AA-403F-9FC5-E76B182EE39D}.Debug|x86.ActiveCfg = Debug|Win32
 		{A5EAA150-02AA-403F-9FC5-E76B182EE39D}.Debug|x86.Build.0 = Debug|Win32
 		{A5EAA150-02AA-403F-9FC5-E76B182EE39D}.Release|Any CPU.ActiveCfg = Release|Win32
+		{A5EAA150-02AA-403F-9FC5-E76B182EE39D}.Release|Any CPU.Build.0 = Release|Win32
 		{A5EAA150-02AA-403F-9FC5-E76B182EE39D}.Release|x64.ActiveCfg = Release|x64
 		{A5EAA150-02AA-403F-9FC5-E76B182EE39D}.Release|x64.Build.0 = Release|x64
 		{A5EAA150-02AA-403F-9FC5-E76B182EE39D}.Release|x86.ActiveCfg = Release|Win32

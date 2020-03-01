@@ -22,7 +22,7 @@ namespace osu_Rate_Changer
 
 		public static uint procPid;
 		public static uint freezeAddr;
-		public static float freezeMul = 1.0f;
+		public static double freezeMul = 1.0f;
 
 		public static Size defaultBtnSize = new Size(65, 30);
 
@@ -116,7 +116,7 @@ namespace osu_Rate_Changer
 		private void UpdateSpeedBtn_Click(object sender, EventArgs e)
 		{
 			if (!forceNormalBox.Checked)
-				Util.SetSpeed((float)RateUpDown.Value);
+				Util.SetSpeed((double)RateUpDown.Value);
 		}
 
 		private void RangeLockCheckbox_CheckedChanged(object sender, EventArgs e)

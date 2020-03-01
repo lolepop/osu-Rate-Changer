@@ -65,11 +65,11 @@ namespace osu_Rate_Changer
 			}
 		}
 
-		public static void SetSpeed(float speedMul)
+		public static void SetSpeed(double speedMul)
 		{
 			Console.WriteLine("Handle: {0:X}\n", (uint)handle);
 
-			WriteProcessMemory(handle, (IntPtr)MainForm.freezeAddr, 1147.0f * speedMul, sizeof(float), out IntPtr a);
+			WriteProcessMemory(handle, (IntPtr)MainForm.freezeAddr, 1147.0f * speedMul, sizeof(double), out IntPtr a);
 		}
 
 		public static int Map(int v, int omin, int omax, int nmin, int nmax)

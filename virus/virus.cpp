@@ -2,12 +2,12 @@
 
 // tested only with stable build but makes use of a common dll so it should work with the different versions
 
-unsigned char speedSig[] = "\xD9\x56\x34\xD8\x05";
+unsigned char speedSig[] = "\xDD\x56\x48\xDC\x05";
 const wchar_t* bass_dll = L"bass_fx.dll";
 
-float speed = 1147.0f; // 1147 is the base speed
+double speed = 1147.0; // 1147 is the base speed
 
-float before = speed;
+double before = speed;
 unsigned int back;
 unsigned int orig; // fadd dword ptr [bass_fx.dll + 0xC1F8]
 
@@ -37,7 +37,7 @@ void exec()
 	std::cout << "Address of pattern: " << std::hex << patternAddr << "\n";
 
 	back = patternAddr + 9;
-	orig = *(unsigned int*)(baseModule + 0xC1F8);
+	orig = *(unsigned int*)(baseModule + 0xE100);
 
 	detour((void*)patternAddr, 9, setSpeed);
 
@@ -67,18 +67,15 @@ void _declspec(naked) setSpeed() // function that replaces original
 {
 	__asm
 	{
-		fst dword ptr [esi + 0x34]
+		fst qword ptr [esi + 0x48]
 	}
 
 	if (speed > 0.f)
 	{
 		__asm
 		{
-			fst st(0)
-			push ebx
-			mov ebx, [speed]
-			mov [esi + 0x34], ebx
-			pop ebx
+			fld qword ptr [speed]
+			fst qword ptr [esi+0x48]
 		}
 	}
 
