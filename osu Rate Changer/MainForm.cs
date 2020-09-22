@@ -16,90 +16,105 @@ namespace osu_Rate_Changer
 {
 	public partial class MainForm : Form
 	{
-		static string procName = "osu!.exe";
-		static string dllName = "virus.dll";
-		static string saveFile = "osuratechanger.xml";
+		static readonly string procName = "osu!.exe";
+		static readonly string dllName = "virus.dll";
+		static readonly string saveFile = "osuratechanger.xml";
 
-		public static uint procPid;
-		public static uint freezeAddr;
-		public static double freezeMul = 1.0f;
+		public InjectionManager InternalManager { get; set; }
 
 		public static Size defaultBtnSize = new Size(65, 30);
 
-		public MainForm()
+		private State.Status _injectedStatus;
+		public State.Status InjectedStatus
 		{
-			InitializeComponent();
+			get => _injectedStatus;
+			set
+			{
+				_injectedStatus = value;
+
+				Enabled = true;
+				UpdateSpeedBtn.Enabled = false;
+				InjectBtn.Enabled = true;
+
+				switch (value)
+				{
+					case State.Status.SUCEESS:
+						StatusLabel.BackColor = Status.SUCCESS;
+						StatusLabel.Text = "Injected";
+						InjectBtn.Text = "Injected";
+						InjectBtn.Enabled = false;
+						forceNormalBox.Enabled = true;
+						UpdateSpeedBtn.Enabled = true;
+						break;
+					case State.Status.FAILED:
+						StatusLabel.BackColor = Status.FAILED;
+						StatusLabel.Text = "Injection failed";
+						break;
+					case State.Status.NOTFOUND:
+						StatusLabel.BackColor = Status.FAILED;
+						InjectBtn.Text = "Inject";
+						StatusLabel.Text = "No process open";
+						break;
+					case State.Status.READY:
+						StatusLabel.BackColor = Status.SUCCESS;
+						InjectBtn.Text = "Inject";
+						StatusLabel.Text = "Ready to inject";
+						break;
+					case State.Status.PROCESSING:
+						Enabled = false;
+						StatusLabel.BackColor = Status.PROCESSING;
+						StatusLabel.Text = "Injecting...";
+						break;
+					default:
+						break;
+				}
+			}
 		}
 
 		private void MainForm_Load(object sender, EventArgs e)
 		{
 			#if DEBUG
-				AllocConsole();
+				Util.AllocConsole();
 			#endif
 
-			bool isOpen = getProcessId("osu!.exe") != 0;
-			StatusLabel.BackColor = isOpen ? Status.SUCCESS : Status.FAILED;
-			StatusLabel.Text = isOpen ? "Ready to inject" : "No process open";
+			bool isOpen = Util.GetProcessId(procName) != 0;
+			InjectedStatus = isOpen ? State.Status.READY : State.Status.NOTFOUND;
 
 			EditGroup.Visible = false;
 
 			if (File.Exists(saveFile))
-			{
 				GenerateButtons(BtnData.Load(saveFile));
-			}
 
+		}
 
-			UpdateSpeedBtn.Enabled = false;
-			Enabled = false;
-			createSlot();
-			Enabled = true;
+		private void HandleClosedCallback()
+		{
+			InternalManager.UnregisterEvents();
+			InternalManager = null;
+
+			InjectedStatus = State.Status.READY;
 		}
 
 		private void InjectBtn_Click(object sender, EventArgs e)
 		{
 			Enabled = false;
+			InjectedStatus = State.Status.PROCESSING;
 
-			uint pid = getProcessId(procName);
+			uint pid = Util.GetProcessId(procName);
 
 			if (pid == 0)
 			{
-				StatusLabel.BackColor = Status.FAILED;
-				StatusLabel.Text = "No process open";
-				Enabled = true;
+				InjectedStatus = State.Status.NOTFOUND;
 				return;
 			}
 
-			procPid = pid;
-
-			StatusLabel.BackColor = Status.PROCESSING;
-			StatusLabel.Text = "Injecting...";
-
-			if (inject(pid, Path.GetFullPath(dllName)))
-			{
-
-				StatusLabel.Text = "Waiting for IPC...";
-				StatusLabel.BackColor = Status.PROCESSING;
-
-				freezeAddr = readSlot();
-
-				StatusLabel.BackColor = Status.SUCCESS;
-				StatusLabel.Text = "Injected";
-				InjectBtn.Text = "Injected";
-
-				Enabled = true;
-				InjectBtn.Enabled = false;
-				forceNormalBox.Enabled = true;
-				UpdateSpeedBtn.Enabled = true;
-
-				Util.GetHandle();
-				Util.SetSpeed(freezeMul);
-
-				return;
-			}
-
-			Enabled = true;
-			StatusLabel.BackColor = Status.FAILED;
-			StatusLabel.Text = "Injection failed";
+			InternalManager = InjectionManager.HookInstance(pid, dllName, HandleClosedCallback, (State.Status status, string err) => {
+				InjectedStatus = status;
+				
+				Console.WriteLine($"Injection: {nameof(status)}, return: {err}");
+				if (status != State.Status.SUCEESS && status != State.Status.PROCESSING)
+					MessageBox.Show($"Failed to hook the game: {err}");
+			});
 
 		}
 
@@ -110,13 +125,13 @@ namespace osu_Rate_Changer
 
 		private void RateUpDown_ValueChanged(object sender, EventArgs e)
 		{
-			RateTrackBar.Value = Math.Min(Math.Max((int)(RateUpDown.Value * 1000.0m), RateTrackBar.Minimum), RateTrackBar.Maximum);
+			RateTrackBar.Value = Util.Clamp((int)(RateUpDown.Value * 1000.0m), RateTrackBar.Minimum, RateTrackBar.Maximum);
 		}
 
 		private void UpdateSpeedBtn_Click(object sender, EventArgs e)
 		{
 			if (!forceNormalBox.Checked)
-				Util.SetSpeed((double)RateUpDown.Value);
+				InternalManager.Speed = (double)RateUpDown.Value;
 		}
 
 		private void RangeLockCheckbox_CheckedChanged(object sender, EventArgs e)
@@ -181,7 +196,7 @@ namespace osu_Rate_Changer
 					Button c = new Button();
 					c.Size = defaultBtnSize;
 					c.Text = a.ToString();
-					c.Click += delegate (object sender, EventArgs e) { Util.SetSpeed(float.Parse(c.Text)); };
+					c.Click += (object sender, EventArgs e) => InternalManager.Speed = float.Parse(c.Text);
 					BtnGroup.Controls.Add(c);
 				}
 			}
@@ -211,7 +226,7 @@ namespace osu_Rate_Changer
 				else
 				{
 					c = new Button();
-					c.Click += delegate (object sender, EventArgs e) { Util.SetSpeed(float.Parse(c.Text)); };
+					c.Click += (object sender, EventArgs e) => InternalManager.Speed = float.Parse(c.Text);
 				}
 
 
@@ -225,9 +240,7 @@ namespace osu_Rate_Changer
 			BtnGroup.Controls.Clear();
 
 			foreach (var a in controls)
-			{
 				BtnGroup.Controls.Add(a);
-			}
 		}
 
 		void ArrangeBtnGroup()
@@ -274,23 +287,13 @@ namespace osu_Rate_Changer
 
 		private void forceNormalBox_CheckedChanged(object sender, EventArgs e)
 		{
-			Util.SetSpeed(forceNormalBox.Checked ? 0 : (float)RateUpDown.Value);
+			InternalManager.Speed = forceNormalBox.Checked ? 0 : (float)RateUpDown.Value;
 		}
 
-		[DllImport("injector.dll", CallingConvention = CallingConvention.Cdecl)]
-		public static extern bool inject(uint pid, string dll);
-
-		[DllImport("injector.dll", CallingConvention = CallingConvention.Cdecl)]
-		public static extern uint getProcessId([MarshalAsAttribute(UnmanagedType.LPWStr)] string procName);
-
-		[DllImport("injector.dll", CallingConvention = CallingConvention.Cdecl)]
-		public static extern bool createSlot(int attempt = 0);
-
-		[DllImport("injector.dll", CallingConvention = CallingConvention.Cdecl)]
-		public static extern uint readSlot();
-
-		[DllImport("kernel32.dll")]
-		static extern bool AllocConsole();
+		public MainForm()
+		{
+			InitializeComponent();
+		}
 
 	}
 }

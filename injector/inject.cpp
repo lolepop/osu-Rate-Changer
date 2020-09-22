@@ -19,7 +19,7 @@ bool inject(DWORD pid, char* dll)
 	WaitForSingleObject(a, INFINITE);
 	CloseHandle(a);
 
-	VirtualFreeEx(handle, dllStrAlloc, strlen(dll), MEM_RELEASE);
+	VirtualFreeEx(handle, dllStrAlloc, 0, MEM_RELEASE);
 	CloseHandle(handle);
 	return true;
 }

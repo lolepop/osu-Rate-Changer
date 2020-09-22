@@ -8,6 +8,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "injector", "injector\injector.vcxproj", "{A5EAA150-02AA-403F-9FC5-E76B182EE39D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu Rate Changer", "osu Rate Changer\osu Rate Changer.csproj", "{B6B2EF4E-F78E-43BE-A376-6D3474600BD8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A5EAA150-02AA-403F-9FC5-E76B182EE39D} = {A5EAA150-02AA-403F-9FC5-E76B182EE39D}
+		{62B67AE3-F337-4FFF-AB36-78E0682D765F} = {62B67AE3-F337-4FFF-AB36-78E0682D765F}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

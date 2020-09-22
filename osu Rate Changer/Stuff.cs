@@ -10,7 +10,7 @@ using System.Xml.Serialization;
 
 namespace osu_Rate_Changer
 {
-	class Util
+	public class Util
 	{
 		[Flags]
 		public enum ProcessAccessFlags : uint
@@ -49,34 +49,38 @@ namespace osu_Rate_Changer
 			out IntPtr lpNumberOfBytesWritten
 		);
 
+		[DllImport("kernel32.dll", SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool GetExitCodeProcess(IntPtr hProcess, out uint lpExitCode);
 
 		[DllImport("kernel32.dll")]
 		public static extern IntPtr OpenProcess(ProcessAccessFlags processAccess, bool bInheritHandle, uint processId);
 
-		static IntPtr handle;
+		[DllImport("injector.dll", EntryPoint = "inject", CallingConvention = CallingConvention.Cdecl)]
+		public static extern bool Inject(uint pid, string dll);
 
-		public static void GetHandle()
-		{
-			handle = OpenProcess(ProcessAccessFlags.VirtualMemoryOperation | ProcessAccessFlags.VirtualMemoryWrite | ProcessAccessFlags.VirtualMemoryRead, false, MainForm.procPid);
+		[DllImport("injector.dll", EntryPoint = "getProcessId", CallingConvention = CallingConvention.Cdecl)]
+		public static extern uint GetProcessId([MarshalAsAttribute(UnmanagedType.LPWStr)] string procName);
 
-			if (handle == IntPtr.Zero)
-			{
-				Console.WriteLine("Failed to obtain handle");
-			}
-		}
+		[DllImport("injector.dll", EntryPoint = "createSlot", CallingConvention = CallingConvention.Cdecl)]
+		public static extern bool CreateSlot(int attempt = 0);
 
-		public static void SetSpeed(double speedMul)
-		{
-			Console.WriteLine("Handle: {0:X}\n", (uint)handle);
+		[DllImport("injector.dll", EntryPoint = "readSlot", CallingConvention = CallingConvention.Cdecl)]
+		public static extern uint ReadSlot();
 
-			WriteProcessMemory(handle, (IntPtr)MainForm.freezeAddr, 1147.0f * speedMul, sizeof(double), out IntPtr a);
-		}
+		[DllImport("kernel32.dll")]
+		public static extern bool AllocConsole();
 
 		public static int Map(int v, int omin, int omax, int nmin, int nmax)
 		{
 			if (omin == omax)
 				return (int)((float)(nmax - nmin) / 2);
 			return (int)((float)(v - omin) / (omax - omin) * (nmax - nmin) + nmin);
+		}
+
+		public static int Clamp(dynamic val, dynamic min, dynamic max)
+		{
+			return (int)Math.Min(Math.Max(val, min), max);
 		}
 	}
 

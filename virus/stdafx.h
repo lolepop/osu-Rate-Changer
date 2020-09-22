@@ -10,6 +10,7 @@
 #include <TlHelp32.h>
 #include <string>
 #include <thread>
+#include <stdlib.h>
 
 #include "sigscan.h"
 #include "detour.h"
