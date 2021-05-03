@@ -1,19 +1,19 @@
 #include "stdafx.h"
 
-unsigned int findPattern(unsigned int startAddr, unsigned char pattern[])
+unsigned int findPattern(unsigned int startAddr, unsigned char pattern[], char mask[])
 {
 	unsigned int patternSize = sizeof(pattern);
 
 	for (unsigned int i = 0; i < UINT_MAX; i++)
 	{
-		if (*(unsigned char*)(startAddr + i) == pattern[0])
+		if (mask[0] != '?' && *(unsigned char*)(startAddr + i) == pattern[0])
 		{
 			bool a = true;
 			unsigned int v = 1;
 
 			for (v; v < patternSize; v++)
 			{
-				if (*(unsigned char*)(startAddr + i + v) != pattern[v])
+				if (mask[v] != '?' && *(unsigned char*)(startAddr + i + v) != pattern[v])
 				{
 					a = false;
 					break;

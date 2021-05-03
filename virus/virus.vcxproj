@@ -85,6 +85,7 @@
   <ItemGroup>
     <ClInclude Include="detour.h" />
     <ClInclude Include="mailslot.h" />
+    <ClInclude Include="mods.h" />
     <ClInclude Include="sigscan.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -93,6 +94,8 @@
     <ClCompile Include="detour.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="mailslot.cpp" />
+    <ClCompile Include="maniabpmscale.cpp" />
+    <ClCompile Include="ratechanger.cpp" />
     <ClCompile Include="sigscan.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

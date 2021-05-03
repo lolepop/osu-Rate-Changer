@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\mods">
+      <UniqueIdentifier>{004f6363-e7b5-4e81-aa9f-3129000dd17a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -28,6 +31,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mailslot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mods.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -49,6 +55,12 @@
     </ClCompile>
     <ClCompile Include="mailslot.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ratechanger.cpp">
+      <Filter>Source Files\mods</Filter>
+    </ClCompile>
+    <ClCompile Include="maniabpmscale.cpp">
+      <Filter>Source Files\mods</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

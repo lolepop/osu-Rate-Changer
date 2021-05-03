@@ -15,5 +15,6 @@
 #include "sigscan.h"
 #include "detour.h"
 #include "mailslot.h"
+#include "mods.h"
 
 void exec();
