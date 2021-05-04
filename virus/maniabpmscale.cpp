@@ -57,7 +57,7 @@ namespace Mods::ManiaBpmScale
 			auto start = std::chrono::high_resolution_clock::now();
 			unsigned int patternAddr = findPatternDynamic(sig, mask);
 			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start);
-			std::cout << "Time taken: " << duration.count() << "\n";
+			std::cout << "Time taken: " << std::dec << duration.count() << "\n";
 			std::cout << "Address of bpm scaling pattern: " << std::hex << patternAddr << "\n";
 		}
 		catch (const std::exception e)

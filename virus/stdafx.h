@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <queue>
 #include <set>
+#include <ppl.h>
 
 #include "sigscan.h"
 #include "detour.h"
