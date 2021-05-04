@@ -32,7 +32,7 @@ unsigned int findPattern(unsigned int startAddr, unsigned char pattern[], char m
 }
 
 // scan all allocated regions in process
-unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned int currAddress = 0, unsigned int maxAddress = UINT_MAX)
+unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned int currAddress, unsigned int maxAddress)
 {
 	int patternSize = strlen(mask);
 	MODULEENTRY32 dll = getModuleFull(GetCurrentProcessId(), L"virus.dll");
@@ -62,7 +62,7 @@ unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned i
 	
 	do
 	{
-		if (firstRun || currAddress >= ((unsigned int)pageInfo.BaseAddress + pageInfo.RegionSize))
+		if (firstRun || currAddress >= (unsigned int)pageInfo.BaseAddress + pageInfo.RegionSize)
 		{
 			firstRun = false;
 			matchCount = 0;
@@ -77,23 +77,27 @@ unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned i
 				continue;
 			}
 
-			VirtualQueryEx(GetCurrentProcess(), (LPCVOID)currAddress, &pageInfo, sizeof(MEMORY_BASIC_INFORMATION));
-			if (pageInfo.Protect == 0 || (pageInfo.Protect & (PAGE_NOACCESS | PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE)) != 0) // is readable without virtualprotect
+			if (VirtualQueryEx(GetCurrentProcess(), (LPCVOID)currAddress, &pageInfo, sizeof(MEMORY_BASIC_INFORMATION)) != sizeof(MEMORY_BASIC_INFORMATION))
+				break;
+			unsigned int n = (unsigned int)pageInfo.BaseAddress + pageInfo.RegionSize;
+
+			if ((pageInfo.State & MEM_COMMIT) && (pageInfo.Protect & (PAGE_EXECUTE_READWRITE | PAGE_READWRITE)) && !(pageInfo.Protect & (PAGE_NOACCESS | PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE))) // is readable without virtualprotect
 			{
-				if (currAddress + pageInfo.RegionSize < currAddress)
+				std::cout << "a: " << pageInfo.BaseAddress << "\n";
+				std::cout << "b: " << pageInfo.RegionSize << "\n";
+				std::cout << "c: " << pageInfo.AllocationBase << "\n";
+				std::cout << "d: " << pageInfo.AllocationProtect << "\n";
+				std::cout << "e: " << pageInfo.Protect << "\n";
+				std::cout << "f: " << pageInfo.Type << "\n\n";
+			}
+			else
+			{
+				if (currAddress > n)
 					return 0;
-				currAddress = (unsigned int)pageInfo.BaseAddress + pageInfo.RegionSize;
+				currAddress = n;
 				continue;
 			}
-			//else
-			//{
-			//	std::cout << "a: " << pageInfo.BaseAddress << "\n";
-			//	std::cout << "b: " << pageInfo.RegionSize << "\n";
-			//	std::cout << "c: " << pageInfo.AllocationBase << "\n";
-			//	std::cout << "d: " << pageInfo.AllocationProtect << "\n";
-			//	std::cout << "e: " << pageInfo.Protect << "\n";
-			//	std::cout << "f: " << pageInfo.Type << "\n\n";
-			//}
+
 		}
 
 		unsigned char addressByte = *(unsigned char*)currAddress; // shut up
@@ -113,7 +117,6 @@ unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned i
 			}
 		}
 
-		//currAddress += matchCount > 0 ? 1 : 4 - (currAddress % 4);
 		currAddress++;
 
 	} while (currAddress < UINT_MAX || currAddress > 0);
