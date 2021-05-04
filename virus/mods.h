@@ -5,11 +5,11 @@ namespace Mods
 {
 	namespace RateChanger
 	{
-		void init(unsigned int baseModule, double* speedPtr);
+		void init(MODULEENTRY32 baseModule, double* speedPtr);
 	}
 
 	namespace ManiaBpmScale
 	{
-		void init(unsigned int baseModule, double* speedPtr);
+		void init(double* speedPtr);
 	}
 }

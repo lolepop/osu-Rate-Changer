@@ -34,7 +34,7 @@ namespace Mods::RateChanger
 
 	}
 
-	void init(unsigned int baseModule, double* speedPtr)
+	void init(MODULEENTRY32 baseModule, double* speedPtr)
 	{
 		speed = speedPtr;
 

@@ -21,22 +21,19 @@ void exec()
 	writeSlot((unsigned int)&speed);
 
 	// base address of bass_fx.dll
-	//unsigned int bassdllBaseAddr = 0;
-	//while (!(bassdllBaseAddr = getModule(GetCurrentProcessId(), BASS_DLL))) // module is only imported once song has been started at least once
-	//{
-	//	std::cout << "Start a song to begin setup" << std::string(28, '\b');
-	//	Sleep(1000);
-	//}
-	//
-	//std::cout << "\nbass_fx.dll loaded, scanning...\n";
-
-	//findPatternDynamic(new unsigned char[1] {}, new char[1] {});
-	Mods::ManiaBpmScale::init(getModule(GetCurrentProcessId(), OSU_EXE), &speed);
+	MODULEENTRY32 bassDll;
+	while (!getModuleFull(GetCurrentProcessId(), BASS_DLL, &bassDll)) // module is only imported once song has been started at least once
+	{
+		std::cout << "Start a song to begin setup" << std::string(28, '\b');
+		Sleep(1000);
+	}
+	
+	std::cout << "\nbass_fx.dll loaded, scanning...\n";
 
 	Sleep(5000); // do not remove, the part we need is not immediately allocated upon module import
 
-	//Mods::RateChanger::init(bassdllBaseAddr, &speed);
-	//Mods::ManiaBpmScale::init(getModule(GetCurrentProcessId(), OSU_EXE), &speed);
+	Mods::RateChanger::init(bassDll, &speed);
+	//Mods::ManiaBpmScale::init(&speed);
 	
 	std::cout << "Speed address: " << &speed << "\n";
 

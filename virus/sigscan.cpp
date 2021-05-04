@@ -1,41 +1,49 @@
 #include "stdafx.h"
 
-unsigned int findPattern(unsigned int startAddr, unsigned char pattern[], char mask[])
+//unsigned int findPattern(unsigned int startAddr, unsigned char pattern[], char mask[])
+//{
+//	unsigned int patternSize = strlen(mask);
+//	
+//	for (unsigned int i = startAddr; i < UINT_MAX; i++)
+//	{
+//		if (mask[0] != '?' && *(unsigned char*)i == pattern[0])
+//		{
+//			bool a = true;
+//			unsigned int v = 1;
+//
+//			for (v; v < patternSize; v++)
+//			{
+//				// bootleg overflow protection
+//				if (mask[v] != '?' && (i + v) > i && *(unsigned char*)(i + v) != pattern[v])
+//				{
+//					a = false;
+//					break;
+//				}
+//			}
+//
+//			if (a)
+//				return (startAddr + i);
+//
+//			//i += v - 1;
+//		}
+//	}
+//
+//	return 0;
+//}
+
+unsigned int findPattern(MODULEENTRY32 module, unsigned char pattern[], char mask[])
 {
-	unsigned int patternSize = strlen(mask);
-	
-	for (unsigned int i = startAddr; i < UINT_MAX; i++)
-	{
-		if (mask[0] != '?' && *(unsigned char*)i == pattern[0])
-		{
-			bool a = true;
-			unsigned int v = 1;
-
-			for (v; v < patternSize; v++)
-			{
-				// bootleg overflow protection
-				if (mask[v] != '?' && (i + v) > i && *(unsigned char*)(i + v) != pattern[v])
-				{
-					a = false;
-					break;
-				}
-			}
-
-			if (a)
-				return (startAddr + i);
-
-			//i += v - 1;
-		}
-	}
-
-	return 0;
+	auto a = (unsigned int)module.modBaseAddr;
+	return findPatternDynamic(pattern, mask, a, a + module.dwSize);
 }
+
 
 // scan all allocated regions in process
 unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned int currAddress, unsigned int maxAddress)
 {
 	int patternSize = strlen(mask);
-	MODULEENTRY32 dll = getModuleFull(GetCurrentProcessId(), L"virus.dll");
+	MODULEENTRY32 dll;
+	getModuleFull(GetCurrentProcessId(), L"virus.dll", &dll);
 	unsigned int dllStart = (unsigned int)dll.modBaseAddr;
 	unsigned int dllEnd = dllStart + (unsigned int)dll.modBaseSize;
 
@@ -83,12 +91,14 @@ unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned i
 
 			if ((pageInfo.State & MEM_COMMIT) && (pageInfo.Protect & (PAGE_EXECUTE_READWRITE | PAGE_READWRITE)) && !(pageInfo.Protect & (PAGE_NOACCESS | PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE))) // is readable without virtualprotect
 			{
-				std::cout << "a: " << pageInfo.BaseAddress << "\n";
-				std::cout << "b: " << pageInfo.RegionSize << "\n";
-				std::cout << "c: " << pageInfo.AllocationBase << "\n";
-				std::cout << "d: " << pageInfo.AllocationProtect << "\n";
-				std::cout << "e: " << pageInfo.Protect << "\n";
-				std::cout << "f: " << pageInfo.Type << "\n\n";
+				#ifdef DEBUG
+					std::cout << "a: " << pageInfo.BaseAddress << "\n";
+					std::cout << "b: " << pageInfo.RegionSize << "\n";
+					std::cout << "c: " << pageInfo.AllocationBase << "\n";
+					std::cout << "d: " << pageInfo.AllocationProtect << "\n";
+					std::cout << "e: " << pageInfo.Protect << "\n";
+					std::cout << "f: " << pageInfo.Type << "\n\n";
+				#endif
 			}
 			else
 			{
@@ -124,12 +134,13 @@ unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned i
 	return 0;
 }
 
-MODULEENTRY32 getModuleFull(DWORD pid, const wchar_t* module)
+bool getModuleFull(DWORD pid, const wchar_t* module, MODULEENTRY32* out)
 {
 	unsigned int baseAddr = 0;
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
 
 	MODULEENTRY32 moduleEntry;
+	bool flag = false;
 	if (snapshot != INVALID_HANDLE_VALUE)
 	{
 		moduleEntry.dwSize = sizeof(moduleEntry);
@@ -138,15 +149,20 @@ MODULEENTRY32 getModuleFull(DWORD pid, const wchar_t* module)
 			do
 			{
 				if (!wcscmp(moduleEntry.szModule, module))
+				{
+					flag = true;
+					*out = moduleEntry;
 					break;
+				}
 			} while (Module32Next(snapshot, &moduleEntry));
 		}
 	}
 	CloseHandle(snapshot);
-	return moduleEntry;
+	return flag;
 }
 
 unsigned int getModule(DWORD pid, const wchar_t* module)
 {
-	return (unsigned int)getModuleFull(pid, module).modBaseAddr;
+	MODULEENTRY32 r;
+	return getModuleFull(pid, module, &r) ? (unsigned int)r.modBaseAddr : -1;
 }

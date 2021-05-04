@@ -48,7 +48,7 @@ namespace Mods::ManiaBpmScale
 
 	}
 
-	void init(unsigned int baseModule, double* speedPtr)
+	void init(double* speedPtr)
 	{
 		speed = speedPtr;
 
