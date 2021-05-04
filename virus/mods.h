@@ -10,6 +10,6 @@ namespace Mods
 
 	namespace ManiaBpmScale
 	{
-		void init();
+		void init(unsigned int baseModule, double* speedPtr);
 	}
 }

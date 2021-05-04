@@ -2,14 +2,14 @@
 
 // hi peppy i bypassed all the anti debugger stuff in like 10 minutes lmao
 
-const wchar_t* bass_dll = L"bass_fx.dll";
+const wchar_t* OSU_EXE = L"osu!.exe";
+const wchar_t* BASS_DLL = L"bass_fx.dll";
 
 //double speed = 1147.0; // 1147 is the base speed
 double speed = 1.0;
 
 double before = speed;
 
-void setSpeed();
 void checkMultiplier();
 
 // dll entry
@@ -21,19 +21,22 @@ void exec()
 	writeSlot((unsigned int)&speed);
 
 	// base address of bass_fx.dll
-	unsigned int baseModule = 0;
-	while (!(baseModule = isModuleLoaded(GetCurrentProcessId(), bass_dll))) // module is only imported once song has been started at least once
-	{
-		std::cout << "Start a song to begin setup" << std::string(28, '\b');
-		Sleep(1000);
-	}
-	
-	std::cout << "\nbass_fx.dll loaded, scanning...\n";
+	//unsigned int bassdllBaseAddr = 0;
+	//while (!(bassdllBaseAddr = getModule(GetCurrentProcessId(), BASS_DLL))) // module is only imported once song has been started at least once
+	//{
+	//	std::cout << "Start a song to begin setup" << std::string(28, '\b');
+	//	Sleep(1000);
+	//}
+	//
+	//std::cout << "\nbass_fx.dll loaded, scanning...\n";
+
+	//findPatternDynamic(new unsigned char[1] {}, new char[1] {});
+	Mods::ManiaBpmScale::init(getModule(GetCurrentProcessId(), OSU_EXE), &speed);
 
 	Sleep(5000); // do not remove, the part we need is not immediately allocated upon module import
 
-	Mods::RateChanger::init(baseModule, &speed);
-	Mods::ManiaBpmScale::init();
+	//Mods::RateChanger::init(bassdllBaseAddr, &speed);
+	//Mods::ManiaBpmScale::init(getModule(GetCurrentProcessId(), OSU_EXE), &speed);
 	
 	std::cout << "Speed address: " << &speed << "\n";
 

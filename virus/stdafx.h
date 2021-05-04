@@ -11,6 +11,10 @@
 #include <string>
 #include <thread>
 #include <stdlib.h>
+#include <string.h>
+#include <algorithm>
+#include <queue>
+#include <set>
 
 #include "sigscan.h"
 #include "detour.h"

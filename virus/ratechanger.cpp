@@ -1,46 +1,51 @@
 #include "stdafx.h"
 
-unsigned char speedSig[] = "\xDD\x56\x48\xDC\x05";
-char speedMask[] = "xxxxx";
-
-unsigned int escapeAddress;
-double* speed;
-
-void _declspec(naked) setSpeed() // function that replaces original
+namespace Mods::RateChanger
 {
-	if (*speed > 0.f)
+	unsigned char speedSig[] = "\xDD\x56\x48\xDC\x05";
+	char speedMask[] = "xxxxx";
+
+	unsigned int escapeAddress;
+	double* speed;
+
+	void _declspec(naked) setSpeed() // function that replaces original
 	{
+		if (*speed > 0.f)
+		{
+			__asm
+			{
+				// fld [*speed]
+				push eax
+				mov eax, [speed]
+				fld qword ptr[eax]
+				pop eax
+
+				fstp qword ptr[esi + 0x40]
+			}
+		}
+
 		__asm
 		{
-			// fld [*speed]
-			push eax
-			mov eax, [speed]
-			fld qword ptr[eax]
-			pop eax
+			fild dword ptr[ebp + 0x0C]
+			fmul qword ptr[esi + 0x40]
 
-			fstp qword ptr[esi + 0x40]
+			jmp [escapeAddress]
 		}
+
 	}
 
-	__asm
+	void init(unsigned int baseModule, double* speedPtr)
 	{
-		fild dword ptr[ebp + 0x0C]
-		fmul qword ptr[esi + 0x40]
+		speed = speedPtr;
 
-		jmp[escapeAddress]
+		// reuse the same pattern
+		unsigned int patternAddr = findPattern(baseModule, speedSig, speedMask) - 6;
+		std::cout << "Address of pattern: " << std::hex << patternAddr << "\n";
+
+		escapeAddress = patternAddr + 6;
+
+		detour((void*)patternAddr, 6, setSpeed);
 	}
 
 }
 
-void Mods::RateChanger::init(unsigned int baseModule, double* speedPtr)
-{
-	speed = speedPtr;
-
-	// reuse the same pattern
-	unsigned int patternAddr = findPattern(baseModule, speedSig, speedMask) - 6;
-	std::cout << "Address of pattern: " << std::hex << patternAddr << "\n";
-
-	escapeAddress = patternAddr + 6;
-
-	detour((void*)patternAddr, 6, setSpeed);
-}
