@@ -16,6 +16,7 @@
 #include <queue>
 #include <set>
 #include <ppl.h>
+#include <nngpp\nngpp.h>
 
 #include "sigscan.h"
 #include "detour.h"
