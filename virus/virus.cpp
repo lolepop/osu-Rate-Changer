@@ -6,19 +6,23 @@ const wchar_t* OSU_EXE = L"osu!.exe";
 const wchar_t* BASS_DLL = L"bass_fx.dll";
 
 //double speed = 1147.0; // 1147 is the base speed
-double speed = 1.0;
+Ipc* ipc;
+IpcState* state = new IpcState();
 
-double before = speed;
-
-void checkMultiplier();
+void messageHandler(messaging::Msg* msg);
 
 // dll entry
 void exec()
 {
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+
 	AllocConsole();
 	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 
-	writeSlot((unsigned int)&speed);
+	ipc = new Ipc(&messageHandler);
+	ipc->start();
+
+	//writeSlot((unsigned int)&speed);
 
 	// base address of bass_fx.dll
 	MODULEENTRY32 bassDll;
@@ -32,28 +36,59 @@ void exec()
 
 	Sleep(5000); // do not remove, the part we need is not immediately allocated upon module import
 
-	Mods::RateChanger::init(bassDll, &speed);
-	//Mods::ManiaBpmScale::init(&speed);
+	Mods::RateChanger::init(bassDll, state);
+	//Mods::ManiaBpmScale::init(state);
 	
-	std::cout << "Speed address: " << &speed << "\n";
+	//std::cout << "Speed address: " << &speed << "\n";
 
-	std::thread(checkMultiplier).detach();
+	//std::thread(checkMultiplier).detach();
 }
 
-void checkMultiplier()
+void messageHandler(messaging::Msg* msg)
 {
-	while (true)
-	{
-		if (speed != before)
-		{
-			before = speed;
+	std::cout << "received message: " << msg->uimsg() << "\n";
+	msg->set_dllmsg(messaging::DllMsg::RESPONSE);
 
-			if (speed > 0.f)
-				printf("Speed multiplier: %.2fx\n", speed);
+	switch (msg->uimsg())
+	{
+	case messaging::UiMsg::SETSPEED:
+		if (msg->doubleval() != state->speed)
+		{
+			state->speed = msg->doubleval();
+			if (state->speed > 0.f)
+				printf("\nSpeed multiplier: %.2fx\n", state->speed);
 			else
-				printf("Speed multiplier: Default\n");
+				printf("\nSpeed multiplier: Default\n");
 		}
-		Sleep(1000);
+		break;
+	case messaging::UiMsg::SETBPMSCALE:
+		if (Mods::ManiaBpmScale::init(state))
+			state->bpmScaleFix = msg->boolval();
+		else
+			msg->set_boolval(false);
+		break;
+	default:
+		return;
 	}
+
+	ipc->send(msg);
+
 }
+
+//void checkMultiplier()
+//{
+//	while (true)
+//	{
+//		if (speed != before)
+//		{
+//			before = speed;
+//
+//			if (speed > 0.f)
+//				printf("Speed multiplier: %.2fx\n", speed);
+//			else
+//				printf("Speed multiplier: Default\n");
+//		}
+//		Sleep(1000);
+//	}
+//}
 

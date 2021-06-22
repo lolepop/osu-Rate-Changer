@@ -1,15 +1,16 @@
 #pragma once
 #include "stdafx.h"
+#include "ipc.h"
 
 namespace Mods
 {
 	namespace RateChanger
 	{
-		void init(MODULEENTRY32 baseModule, double* speedPtr);
+		void init(MODULEENTRY32 baseModule, IpcState* state);
 	}
 
 	namespace ManiaBpmScale
 	{
-		void init(double* speedPtr);
+		bool init(IpcState* state);
 	}
 }
