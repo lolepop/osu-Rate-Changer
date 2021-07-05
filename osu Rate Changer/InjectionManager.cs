@@ -61,7 +61,6 @@ namespace osu_Rate_Changer
 		{
 			Handle = handle;
             IpcInstance = ipcHandler;
-			Speed = _speed; // set default once;
 
 			ClosedCallback = handleClosedCallback;
 
@@ -128,12 +127,6 @@ namespace osu_Rate_Changer
 
 			return new InjectionManager(handle, ipcHandler, handleClosedCallback);
 		}
-
-		//private void SetSpeed(double speedMul)
-		//{
-		//	//WriteProcessMemory(handle, (IntPtr)MainForm.freezeAddr, 1147.0f * speedMul, sizeof(double), out IntPtr a);
-		//	//WriteProcessMemory(Handle, FreezeAddr, speedMul, sizeof(double), out IntPtr a);
-		//}
 
 		public void UnregisterEvents()
 		{

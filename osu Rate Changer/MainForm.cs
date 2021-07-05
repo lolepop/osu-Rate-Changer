@@ -35,6 +35,7 @@ namespace osu_Rate_Changer
 
 				Enabled = true;
 				forceNormalBox.Enabled = false;
+				forceNormalBox.Checked = false;
 				bpmScalingFixBox.Enabled = false;
 				UpdateSpeedBtn.Enabled = false;
 				InjectBtn.Enabled = true;
@@ -46,7 +47,6 @@ namespace osu_Rate_Changer
 						StatusLabel.Text = "Injected";
 						InjectBtn.Text = "Injected";
 						InjectBtn.Enabled = false;
-						forceNormalBox.Checked = false;
 						forceNormalBox.Enabled = true;
 						bpmScalingFixBox.Enabled = true;
 						UpdateSpeedBtn.Enabled = true;
@@ -86,18 +86,6 @@ namespace osu_Rate_Changer
 			InjectedStatus = isOpen ? State.Status.READY : State.Status.NOTFOUND;
 
 			IpcInstance = new IpcHandler();
-
-			//Task.Run(async () => {
-   //             while (!instance.IsReadyToSend)
-   //                 await Task.Delay(100);
-
-   //             instance.Send(new Messaging.Msg {
-			//		UiMsg = Messaging.UiMsg.Setspeed,
-			//		DoubleVal = 2.5
-			//	});
-
-			//});
-
 
             EditGroup.Visible = false;
 

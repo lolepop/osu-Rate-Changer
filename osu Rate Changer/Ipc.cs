@@ -37,41 +37,14 @@ namespace osu_Rate_Changer
 
         private void StartInboundThread()
         {
-
-            //var a = Observable
-            //    .FromAsync(() => Connection.Receive(), Scheduler.CurrentThread)
-            //    .Repeat()
-            //    .SubscribeOn(Scheduler.CurrentThread)
-            //    ;
-
-            //a.Subscribe(HandleMessage);
-
             InboundMessageSubscription = Observable.Interval(TimeSpan.FromMilliseconds(10))
                 .Select(_ => Connection.Receive())
                 .Where(msg => msg != null)
                 .Subscribe(HandleMessage);
 
-            //InboundMessageStream
-            //    .SubscribeOn(Scheduler.CurrentThread)
-            //    .Subscribe(HandleMessage);
-
             OutboundMessageStream
                 .Where(_ => IsReadyToSend.Value)
                 .Subscribe(Connection.Send);
-
-
-            //InboundThread = Task.Run(() => {
-            //    while (true)
-            //    {
-            //        var msg = Connection.Receive();
-            //        if (msg != null) lock (obj) InboundMessageStream.OnNext(msg);
-            //    }
-            //});
-
-            //await Connection.Send(new Messaging.Msg {
-            //    UiMsg = Messaging.UiMsg.Setspeed,
-            //    DoubleVal = 2.5
-            //});
         }
 
         private void HandleMessage(Messaging.Msg msg)

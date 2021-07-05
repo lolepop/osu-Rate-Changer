@@ -22,26 +22,17 @@ void exec()
 	ipc = new Ipc(&messageHandler);
 	ipc->start();
 
-	//writeSlot((unsigned int)&speed);
-
 	// base address of bass_fx.dll
 	MODULEENTRY32 bassDll;
+	std::cout << "Start a song to begin setup\n";
 	while (!getModuleFull(GetCurrentProcessId(), BASS_DLL, &bassDll)) // module is only imported once song has been started at least once
-	{
-		std::cout << "Start a song to begin setup" << std::string(28, '\b');
 		Sleep(1000);
-	}
 	
 	std::cout << "\nbass_fx.dll loaded, scanning...\n";
 
 	Sleep(5000); // do not remove, the part we need is not immediately allocated upon module import
 
 	Mods::RateChanger::init(bassDll, state);
-	//Mods::ManiaBpmScale::init(state);
-	
-	//std::cout << "Speed address: " << &speed << "\n";
-
-	//std::thread(checkMultiplier).detach();
 }
 
 void messageHandler(messaging::Msg* msg)
@@ -74,21 +65,3 @@ void messageHandler(messaging::Msg* msg)
 	ipc->send(msg);
 
 }
-
-//void checkMultiplier()
-//{
-//	while (true)
-//	{
-//		if (speed != before)
-//		{
-//			before = speed;
-//
-//			if (speed > 0.f)
-//				printf("Speed multiplier: %.2fx\n", speed);
-//			else
-//				printf("Speed multiplier: Default\n");
-//		}
-//		Sleep(1000);
-//	}
-//}
-
