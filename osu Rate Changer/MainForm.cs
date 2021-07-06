@@ -126,12 +126,15 @@ namespace osu_Rate_Changer
 					MessageBox.Show($"Failed to hook the game: {err}");
 			});
 
-            InternalManager.ToggleBpmScale += state => {
-				BeginInvoke((MethodInvoker)delegate () {
-					bpmScalingFixBox.Checked = state;
-					bpmScalingFixBox.Enabled = true;
-				});
-			};
+			if (InternalManager is not null)
+            {
+				InternalManager.ToggleBpmScale += state => {
+					BeginInvoke((MethodInvoker)delegate () {
+						bpmScalingFixBox.Checked = state;
+						bpmScalingFixBox.Enabled = true;
+					});
+				};
+            }
 
 		}
 
@@ -304,7 +307,7 @@ namespace osu_Rate_Changer
 
 		private void forceNormalBox_CheckedChanged(object sender, EventArgs e)
 		{
-			InternalManager.Speed = forceNormalBox.Checked ? 0 : (float)RateUpDown.Value;
+			InternalManager.Speed = forceNormalBox.Checked ? -1.0 : (double)RateUpDown.Value;
 		}
 
 		public MainForm()

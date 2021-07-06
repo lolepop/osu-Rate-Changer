@@ -9,7 +9,7 @@ Ipc::Ipc(void (*handleMessage)(messaging::Msg* msg))
 	this->sock = nng::pair::v0::open();
 	this->sock.dial(URL);
 	
-	std::cout << "\nconnected\n";
+	std::cout << "connected\n";
 }
 
 void Ipc::start()

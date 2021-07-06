@@ -61,7 +61,7 @@ namespace Mods::ManiaBpmScale
 		if (isInitialised)
 			return true;
 
-		std::cout << "\nAttempting to hook bpm scale function\n";
+		std::cout << "Attempting to hook bpm scale function\n";
 
 		speed = &state->speed;
 		bpmScaleFix = &state->bpmScaleFix;
@@ -72,13 +72,14 @@ namespace Mods::ManiaBpmScale
 			unsigned int patternAddr = findPatternDynamic(sig, mask);
 			//auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start);
 			//std::cout << "Time taken: " << std::dec << duration.count() << "\n";
-			std::cout << "Address of bpm scaling pattern: " << std::hex << patternAddr << "\n";
 
 			if (patternAddr == 0)
 			{
-				std::cout << "\nFailed to hook bpm scale function, make sure you have started a map in mania\n";
+				std::cout << "Failed to hook bpm scale function, make sure you have started a map in mania\n";
 				return false;
 			}
+
+			std::cout << "Address of bpm scaling pattern: " << std::hex << patternAddr << "\n";
 
 			escapeAddress = patternAddr + 8;
 			ptrA = *(unsigned int*)(patternAddr + 4);
@@ -93,6 +94,9 @@ namespace Mods::ManiaBpmScale
 			std::cout << "wtf: " << e.what();
 			return false;
 		}
+
+		std::cout << "Hooked bpm scale function\n";
+
 
 		return true;
 

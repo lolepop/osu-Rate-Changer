@@ -30,6 +30,7 @@ namespace osu_Rate_Changer
 		public delegate void HandleToggleBpmScale(bool state);
 		public event HandleToggleBpmScale ToggleBpmScale;
 
+		// protobuf serialisation error when DoubleVal is set to 0. probably a bug
         private double _speed = 1.0f;
 		public double Speed
 		{
@@ -90,15 +91,17 @@ namespace osu_Rate_Changer
 
 		private void ValidateHandleEvent(object sender, ElapsedEventArgs e)
 		{
-			// wtf are you supposed to do if this fails lol
-			if (GetExitCodeProcess(Handle, out uint exitcode) && exitcode != 259)
+			if (HasHandleExited(Handle))
 			{
 				Task.Run(() => MessageBox.Show("Game handle was closed"));
 				ClosedCallback.Invoke();
 			}
 		}
 
-		public static InjectionManager HookInstance(uint pid, string dllName, IpcHandler ipcHandler, HandleClosedCallback handleClosedCallback, Action<State.Status, string> stateHandler)
+		// wtf are you supposed to do if this fails lol
+        private static bool HasHandleExited(IntPtr handle) => GetExitCodeProcess(handle, out uint exitcode) && exitcode != 259;
+
+        public static InjectionManager HookInstance(uint pid, string dllName, IpcHandler ipcHandler, HandleClosedCallback handleClosedCallback, Action<State.Status, string> stateHandler)
 		{
 			IntPtr handle = OpenProcess(ProcessAccessFlags.VirtualMemoryOperation | ProcessAccessFlags.VirtualMemoryWrite | ProcessAccessFlags.VirtualMemoryRead, false, pid);
 
@@ -122,9 +125,24 @@ namespace osu_Rate_Changer
 
 			//IntPtr freezeAddr = (IntPtr)Util.ReadSlot();
 
-			ipcHandler.IsReadyToSend.Wait(); // block thread until remote process has signaled
-			stateHandler?.Invoke(State.Status.SUCEESS, null);
+			// block thread until remote process has signaled or takes too long
+			var isReady = Observable.Merge(
+					Observable.Timer(TimeSpan.FromSeconds(5))
+						.Select(_ => false)
+						.Materialize(),
+					ipcHandler.IsReadyToSend.Materialize()
+				)
+				.TakeWhile(n => n.HasValue)
+				.Dematerialize()
+				.Wait();
 
+			if (!isReady)
+            {
+				stateHandler?.Invoke(State.Status.FAILED, "Injection failed");
+				return null;
+            }
+
+			stateHandler?.Invoke(State.Status.SUCEESS, null);
 			return new InjectionManager(handle, ipcHandler, handleClosedCallback);
 		}
 

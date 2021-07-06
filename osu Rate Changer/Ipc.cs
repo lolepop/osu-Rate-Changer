@@ -100,8 +100,6 @@ namespace osu_Rate_Changer
         // how do i timeout the async send theres no cancellation token lmao
         public void Send(Messaging.Msg message)
         {
-            var msg = Factory.CreateMessage();
-            msg.Append(message.ToByteArray());
             Socket.Send(message.ToByteArray(), nng.Native.Defines.NngFlag.NNG_FLAG_NONBLOCK);
             //await Ctx.Send(msg);
         }

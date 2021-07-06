@@ -28,7 +28,7 @@ void exec()
 	while (!getModuleFull(GetCurrentProcessId(), BASS_DLL, &bassDll)) // module is only imported once song has been started at least once
 		Sleep(1000);
 	
-	std::cout << "\nbass_fx.dll loaded, scanning...\n";
+	std::cout << "bass_fx.dll loaded, scanning...\n";
 
 	Sleep(5000); // do not remove, the part we need is not immediately allocated upon module import
 
@@ -37,7 +37,10 @@ void exec()
 
 void messageHandler(messaging::Msg* msg)
 {
-	std::cout << "received message: " << msg->uimsg() << "\n";
+	#ifdef _DEBUG
+		std::cout << "received message: " << messaging::UiMsg_descriptor()->FindValueByNumber(msg->uimsg())->name() << "\n";
+	#endif // DEBUG
+	
 	msg->set_dllmsg(messaging::DllMsg::RESPONSE);
 
 	switch (msg->uimsg())
@@ -47,9 +50,9 @@ void messageHandler(messaging::Msg* msg)
 		{
 			state->speed = msg->doubleval();
 			if (state->speed > 0.f)
-				printf("\nSpeed multiplier: %.2fx\n", state->speed);
+				printf("Speed multiplier: %.2fx\n", state->speed);
 			else
-				printf("\nSpeed multiplier: Default\n");
+				printf("Speed multiplier: Default\n");
 		}
 		break;
 	case messaging::UiMsg::SETBPMSCALE:
