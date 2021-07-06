@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package messaging;
+
+enum UiMsg
+{
+    SETSPEED = 0;
+	SETBPMSCALE = 1;
+}
+
+enum DllMsg
+{
+    CONNECTED = 0;
+	RESPONSE = 1;
+}
+
+message Msg
+{
+	UiMsg uiMsg = 1;
+	DllMsg dllMsg = 2;
+
+    double doubleVal = 3;
+	bool boolVal = 4;
+
+}

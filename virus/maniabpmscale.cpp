@@ -6,6 +6,7 @@ namespace Mods::ManiaBpmScale
 	char mask[] = "xxxx????xx????xxx";
 
 	unsigned int escapeAddress;
+	bool* bpmScaleFix;
 	double* speed;
 
 	unsigned int ptrA;
@@ -26,48 +27,79 @@ namespace Mods::ManiaBpmScale
 
 	void _declspec(naked) calcBpmScaling()
 	{
-		if (*speed > 0.f)
+		if (*bpmScaleFix && *speed > 0.f)
 		{
 			__asm
 			{
-				// fld [*speed]
+				fstp st(0)
+
 				push eax
 				mov eax, [speed]
-
+				fld qword ptr[eax]
 				pop eax
-
 			}
 		}
 
 		__asm
 		{
 			fmulp st(1), st(0)
-			fstp qword ptr[ptrA]
+			
+			push eax
+			mov eax, [ptrA]
+			fstp qword ptr[eax]
+			pop eax
+
 			jmp[escapeAddress]
 		}
 
 	}
 
-	void init(double* speedPtr)
+	bool init(IpcState* state)
 	{
-		speed = speedPtr;
+		static bool isInitialised = false;
+
+		if (isInitialised)
+			return true;
+
+		std::cout << "Attempting to hook bpm scale function\n";
+
+		speed = &state->speed;
+		bpmScaleFix = &state->bpmScaleFix;
 
 		try
 		{
-			auto start = std::chrono::high_resolution_clock::now();
+			//auto start = std::chrono::high_resolution_clock::now();
 			unsigned int patternAddr = findPatternDynamic(sig, mask);
-			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start);
-			std::cout << "Time taken: " << std::dec << duration.count() << "\n";
+			//auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start);
+			//std::cout << "Time taken: " << std::dec << duration.count() << "\n";
+
+			if (patternAddr == 0)
+			{
+				std::cout << "Failed to hook bpm scale function, make sure you have started a map in mania\n";
+				return false;
+			}
+
 			std::cout << "Address of bpm scaling pattern: " << std::hex << patternAddr << "\n";
+
+			escapeAddress = patternAddr + 8;
+			ptrA = *(unsigned int*)(patternAddr + 4);
+			std::cout << "\n ptrA: " << ptrA << "\n";
+
+			detour((void*)patternAddr, 8, calcBpmScaling);
+
+			isInitialised = true;
 		}
 		catch (const std::exception e)
 		{
 			std::cout << "wtf: " << e.what();
+			return false;
 		}
 
-		//escapeAddress = patternAddr + 8;
+		std::cout << "Hooked bpm scale function\n";
 
-		//detour((void*)patternAddr, 8, calcBpmScaling);
+
+		return true;
+
 	}
 
 }

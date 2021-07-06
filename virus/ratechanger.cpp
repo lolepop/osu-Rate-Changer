@@ -34,9 +34,9 @@ namespace Mods::RateChanger
 
 	}
 
-	void init(MODULEENTRY32 baseModule, double* speedPtr)
+	void init(MODULEENTRY32 baseModule, IpcState* state)
 	{
-		speed = speedPtr;
+		speed = &state->speed;
 
 		// reuse the same pattern
 		unsigned int patternAddr = findPattern(baseModule, speedSig, speedMask) - 6;
