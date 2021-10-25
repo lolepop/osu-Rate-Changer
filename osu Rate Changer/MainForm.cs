@@ -49,6 +49,7 @@ namespace osu_Rate_Changer
 						InjectBtn.Enabled = false;
 						forceNormalBox.Enabled = true;
 						bpmScalingFixBox.Enabled = true;
+						bpmScalingFixBox.Checked = false;
 						UpdateSpeedBtn.Enabled = true;
 						break;
 					case State.Status.FAILED:
