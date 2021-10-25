@@ -6,54 +6,65 @@ const wchar_t* OSU_EXE = L"osu!.exe";
 const wchar_t* BASS_DLL = L"bass_fx.dll";
 
 //double speed = 1147.0; // 1147 is the base speed
-double speed = 1.0;
+Ipc* ipc;
+IpcState* state = new IpcState();
 
-double before = speed;
-
-void checkMultiplier();
+void messageHandler(messaging::Msg* msg);
 
 // dll entry
 void exec()
 {
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+
 	AllocConsole();
 	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 
-	writeSlot((unsigned int)&speed);
+	ipc = new Ipc(&messageHandler);
+	ipc->start();
 
 	// base address of bass_fx.dll
 	MODULEENTRY32 bassDll;
+	std::cout << "Start a song to begin setup\n";
 	while (!getModuleFull(GetCurrentProcessId(), BASS_DLL, &bassDll)) // module is only imported once song has been started at least once
-	{
-		std::cout << "Start a song to begin setup" << std::string(28, '\b');
 		Sleep(1000);
-	}
 	
-	std::cout << "\nbass_fx.dll loaded, scanning...\n";
+	std::cout << "bass_fx.dll loaded, scanning...\n";
 
 	Sleep(5000); // do not remove, the part we need is not immediately allocated upon module import
 
-	Mods::RateChanger::init(bassDll, &speed);
-	//Mods::ManiaBpmScale::init(&speed);
-	
-	std::cout << "Speed address: " << &speed << "\n";
-
-	std::thread(checkMultiplier).detach();
+	Mods::RateChanger::init(bassDll, state);
 }
 
-void checkMultiplier()
+void messageHandler(messaging::Msg* msg)
 {
-	while (true)
-	{
-		if (speed != before)
-		{
-			before = speed;
+	#ifdef _DEBUG
+		std::cout << "received message: " << messaging::UiMsg_descriptor()->FindValueByNumber(msg->uimsg())->name() << "\n";
+	#endif // DEBUG
+	
+	msg->set_dllmsg(messaging::DllMsg::RESPONSE);
 
-			if (speed > 0.f)
-				printf("Speed multiplier: %.2fx\n", speed);
+	switch (msg->uimsg())
+	{
+	case messaging::UiMsg::SETSPEED:
+		if (msg->doubleval() != state->speed)
+		{
+			state->speed = msg->doubleval();
+			if (state->speed > 0.f)
+				printf("Speed multiplier: %.2fx\n", state->speed);
 			else
 				printf("Speed multiplier: Default\n");
 		}
-		Sleep(1000);
+		break;
+	case messaging::UiMsg::SETBPMSCALE:
+		if (Mods::ManiaBpmScale::init(state))
+			state->bpmScaleFix = msg->boolval();
+		else
+			msg->set_boolval(false);
+		break;
+	default:
+		return;
 	}
-}
 
+	ipc->send(msg);
+
+}

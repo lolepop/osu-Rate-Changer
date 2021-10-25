@@ -21,6 +21,7 @@ namespace osu_Rate_Changer
 		static readonly string saveFile = "osuratechanger.xml";
 
 		public InjectionManager InternalManager { get; set; }
+		public IpcHandler IpcInstance { get; set; }
 
 		public static Size defaultBtnSize = new Size(65, 30);
 
@@ -33,6 +34,9 @@ namespace osu_Rate_Changer
 				_injectedStatus = value;
 
 				Enabled = true;
+				forceNormalBox.Enabled = false;
+				forceNormalBox.Checked = false;
+				bpmScalingFixBox.Enabled = false;
 				UpdateSpeedBtn.Enabled = false;
 				InjectBtn.Enabled = true;
 
@@ -44,6 +48,8 @@ namespace osu_Rate_Changer
 						InjectBtn.Text = "Injected";
 						InjectBtn.Enabled = false;
 						forceNormalBox.Enabled = true;
+						bpmScalingFixBox.Enabled = true;
+						bpmScalingFixBox.Checked = false;
 						UpdateSpeedBtn.Enabled = true;
 						break;
 					case State.Status.FAILED:
@@ -80,7 +86,9 @@ namespace osu_Rate_Changer
 			bool isOpen = Util.GetProcessId(procName) != 0;
 			InjectedStatus = isOpen ? State.Status.READY : State.Status.NOTFOUND;
 
-			EditGroup.Visible = false;
+			IpcInstance = new IpcHandler();
+
+            EditGroup.Visible = false;
 
 			if (File.Exists(saveFile))
 				GenerateButtons(BtnData.Load(saveFile));
@@ -89,15 +97,18 @@ namespace osu_Rate_Changer
 
 		private void HandleClosedCallback()
 		{
-			InternalManager.UnregisterEvents();
+			InternalManager?.UnregisterEvents();
 			InternalManager = null;
+			IpcInstance?.Dispose();
+			IpcInstance = new IpcHandler();
 
-			InjectedStatus = State.Status.READY;
+			BeginInvoke((MethodInvoker)delegate () {
+				InjectedStatus = State.Status.READY;
+			});
 		}
 
 		private void InjectBtn_Click(object sender, EventArgs e)
 		{
-			Enabled = false;
 			InjectedStatus = State.Status.PROCESSING;
 
 			uint pid = Util.GetProcessId(procName);
@@ -108,7 +119,7 @@ namespace osu_Rate_Changer
 				return;
 			}
 
-			InternalManager = InjectionManager.HookInstance(pid, dllName, HandleClosedCallback, (State.Status status, string err) => {
+			InternalManager = InjectionManager.HookInstance(pid, dllName, IpcInstance, HandleClosedCallback, (State.Status status, string err) => {
 				InjectedStatus = status;
 				
 				Console.WriteLine($"Injection: {nameof(status)}, return: {err}");
@@ -116,9 +127,19 @@ namespace osu_Rate_Changer
 					MessageBox.Show($"Failed to hook the game: {err}");
 			});
 
+			if (InternalManager is not null)
+            {
+				InternalManager.ToggleBpmScale += state => {
+					BeginInvoke((MethodInvoker)delegate () {
+						bpmScalingFixBox.Checked = state;
+						bpmScalingFixBox.Enabled = true;
+					});
+				};
+            }
+
 		}
 
-		private void RateTrackBar_Scroll(object sender, EventArgs e)
+        private void RateTrackBar_Scroll(object sender, EventArgs e)
 		{
 			RateUpDown.Value = RateTrackBar.Value / 1000.0m;
 		}
@@ -287,7 +308,7 @@ namespace osu_Rate_Changer
 
 		private void forceNormalBox_CheckedChanged(object sender, EventArgs e)
 		{
-			InternalManager.Speed = forceNormalBox.Checked ? 0 : (float)RateUpDown.Value;
+			InternalManager.Speed = forceNormalBox.Checked ? -1.0 : (double)RateUpDown.Value;
 		}
 
 		public MainForm()
@@ -295,5 +316,10 @@ namespace osu_Rate_Changer
 			InitializeComponent();
 		}
 
-	}
+        private void bpmScalingFixBox_Click(object sender, EventArgs e)
+        {
+			bpmScalingFixBox.Enabled = false;
+			InternalManager.BpmScaleFix = !bpmScalingFixBox.Checked;
+		}
+    }
 }

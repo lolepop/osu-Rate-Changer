@@ -37,7 +37,6 @@ unsigned int findPattern(MODULEENTRY32 module, unsigned char pattern[], char mas
 	return findPatternDynamic(pattern, mask, a, a + module.dwSize);
 }
 
-
 // scan all allocated regions in process
 unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned int currAddress, unsigned int maxAddress)
 {
@@ -53,21 +52,11 @@ unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned i
 	std::queue<unsigned int> firstCharQueue; // optimisation: offset address of first character matches
 	std::set<unsigned int> checkedOffsets;
 
-	bool firstRun = true;
-
-	auto byteMatch = [&](int i, unsigned char b) {
-		bool match = mask[i] == '?' || b == pattern[i];
-		if (i == 0 && match && !checkedOffsets.count(currAddress))
-		{
-			firstCharQueue.push(currAddress);
-			checkedOffsets.insert(currAddress);
-		}
-		return match;
-	};
-
-	MEMORY_BASIC_INFORMATION currentDllInfo;
-	VirtualQueryEx(GetCurrentProcess(), &findPatternDynamic, &currentDllInfo, sizeof(MEMORY_BASIC_INFORMATION));
+	//MEMORY_BASIC_INFORMATION currentDllInfo;
+	//VirtualQueryEx(GetCurrentProcess(), &findPatternDynamic, &currentDllInfo, sizeof(MEMORY_BASIC_INFORMATION));
 	
+	bool firstRun = true;
+	auto procHandle = GetCurrentProcess();
 	do
 	{
 		if (firstRun || currAddress >= (unsigned int)pageInfo.BaseAddress + pageInfo.RegionSize)
@@ -85,7 +74,7 @@ unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned i
 				continue;
 			}
 
-			if (VirtualQueryEx(GetCurrentProcess(), (LPCVOID)currAddress, &pageInfo, sizeof(MEMORY_BASIC_INFORMATION)) != sizeof(MEMORY_BASIC_INFORMATION))
+			if (VirtualQueryEx(procHandle, (LPCVOID)currAddress, &pageInfo, sizeof(MEMORY_BASIC_INFORMATION)) != sizeof(MEMORY_BASIC_INFORMATION))
 				break;
 			unsigned int n = (unsigned int)pageInfo.BaseAddress + pageInfo.RegionSize;
 
@@ -110,8 +99,18 @@ unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned i
 
 		}
 
-		unsigned char addressByte = *(unsigned char*)currAddress; // shut up
-		if (byteMatch(matchCount, addressByte)) // subsequent chars
+		auto addressByte = *(unsigned char*)(currAddress);
+		bool match = addressByte == pattern[matchCount];
+		if ((match && matchCount == 0) || addressByte == pattern[0])
+		{
+			if (checkedOffsets.find(currAddress) == checkedOffsets.end())
+			{
+				firstCharQueue.push(currAddress);
+				checkedOffsets.insert(currAddress);
+			}
+		}
+
+		if (mask[matchCount] == '?' || match) // subsequent chars
 		{
 			if (++matchCount == patternSize)
 				return currAddress - patternSize + 1;
@@ -129,7 +128,7 @@ unsigned int findPatternDynamic(unsigned char pattern[], char mask[], unsigned i
 
 		currAddress++;
 
-	} while (currAddress < UINT_MAX || currAddress > 0);
+	} while (currAddress < maxAddress || currAddress > 0);
 
 	return 0;
 }

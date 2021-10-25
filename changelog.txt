@@ -1,6 +1,0 @@
-changelog
-
-16/4/19:
-- checkbox added to toggle between forcing set rate and using the default rate the game sets
-- small change to free memory of dll name allocation
-- dll unloading seems too hacky to bother with
